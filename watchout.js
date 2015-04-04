@@ -25,7 +25,8 @@ var createEnemies = function() {
     enemyArr.push({
       id: i,
       x:Math.random()*100 ,
-      y:Math.random()*100
+      y:Math.random()*100,
+      r: 15
     })
   }
   return enemyArr;
@@ -38,7 +39,7 @@ d3.select('svg').selectAll('circle').data(enemies)
   .enter().append('circle')
   .attr('cx', function(d){return axes.x(d.x)})
   .attr('cy', function(d){return axes.y(d.y)})
-  .attr('r', 15)
+  .attr('r', function(d){return d.r})
 
 //setup dragging
 var onDragDrop = function(dragHandler) {
@@ -72,11 +73,14 @@ d3.select('svg').selectAll('circle').data(createEnemies())
   .ease('exp')
   .attr('cx', function(d){return axes.x(d.x)})
   .attr('cy', function(d){return axes.y(d.y)})
-  .attr('r', 15)
+  .attr('r', function(d){return d.r})
 }
 
 
 
 
 setInterval(moveEnemy, 1000);
+
+var touching = 30
+var xDiff =  parseFloat()
 
