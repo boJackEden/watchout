@@ -33,56 +33,50 @@ var createEnemies = function() {
 
 var enemies = createEnemies();
 
+//load enemies into svg canvas
 d3.select('svg').selectAll('circle').data(enemies)
   .enter().append('circle')
   .attr('cx', function(d){return axes.x(d.x)})
   .attr('cy', function(d){return axes.y(d.y)})
   .attr('r', 15)
 
+//setup dragging
+var onDragDrop = function(dragHandler) {
+  var drag = d3.behavior.drag();
+  drag.on("drag", dragHandler)
+  return drag;
+}
+
+var dragmove = function(d) {
+  d3.select(this)
+  .attr("x", d.x = d3.event.x)
+  .attr("y", d.y = d3.event.y)
+}
+
+//load player onto svg canvas
+d3.select('svg').selectAll('rect').data([1]).enter()
+  .append("rect")
+  .attr("x", function(d){return d.x})
+  .attr("y", function(d){return d.y})
+  .attr("width", 50)
+  .attr("height", 50)
+  .attr("fill", 'green')
+  .call(onDragDrop(dragmove));
 
 
+
+//function to move enemies to new coordinates
 var moveEnemy = function(){
-d3.select('svg').selectAll('circle').data( createEnemies() )
+d3.select('svg').selectAll('circle').data(createEnemies())
   .transition()
-  .delay(1500)
+  .ease('exp')
   .attr('cx', function(d){return axes.x(d.x)})
   .attr('cy', function(d){return axes.y(d.y)})
   .attr('r', 15)
 }
-setInterval(moveEnemy, 2000);
-
-
-//populate with enemies
-// d3.select("svg").append("svg")
-//   .attr("width", 50)
-//   .attr("height", 50)
-//   .append("circle")
-//   .data(enemies)
-//   .attr("cx", function(d){d.x})
-//   .attr("cy", function(d){d.y})
-//   .attr("r", 25)
-//   .style("fill", "purple");
-
-
-// var render = function(enemies){
-//   var enemies = d3.gameboard.selectAll('').data(enemies,
-//                     function(d){d.id});
-
-//   enemies.enter().append("svg:circle").attr('class', 'enemy')
-//   .attr('cx', function(enemy){axes.x(enemy.x)})
-//   .attr('cy', function(enemy){axes.y(enemy.y)})
-//   .attr('r', 10)
-
-//   enemies.exit()
-//   .remove();
-// }
-// var testArray = createEnemies();
-// render( testArray );
 
 
 
 
-//setup the player
+setInterval(moveEnemy, 1000);
 
-
-//setup collisions and updating scoreboardx`
