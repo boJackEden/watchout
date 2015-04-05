@@ -5,8 +5,8 @@
 var gameOptions = {
   height: 500,
   width: 1000,
-  nEnemies: 10,
-  padding: 20
+  nEnemies: 30,
+  padding: 5
 }
 
 
@@ -18,6 +18,7 @@ var axes = {
 d3.select('.gameboard').append('svg:svg')
   .attr('width', gameOptions.width)
   .attr('height', gameOptions.height)
+  .attr("xlink:href", 'stars.jpg')
 
 
 var createEnemies = function() {
@@ -37,10 +38,14 @@ var enemies = createEnemies();
 
 //load enemies into svg canvas
 var initialEnemies = d3.select('svg').selectAll('circle').data(enemies)
-  .enter().append('circle')
-  .attr('cx', function(d){return axes.x(d.x)})
-  .attr('cy', function(d){return axes.y(d.y)})
+  .enter().append('svg:image')
+  .attr("class", "freds")
+  .attr('x', function(d){return axes.x(d.x)})
+  .attr('y', function(d){return axes.y(d.y)})
   .attr('r', function(d){return d.r})
+  .attr("width", 50)
+  .attr("height", 50)
+  .attr("xlink:href", "fred.png")
 
 //setup dragging
 var onDragDrop = function(dragHandler) {
@@ -56,43 +61,62 @@ var dragmove = function(d) {
 }
 
 //load player onto svg canvas
-d3.select('svg').selectAll('rect').data([1]).enter()
+
+var player = d3.select('svg').selectAll('rect').data([1]).enter()
   .append("rect")
   .attr("x", function(d){return d.x})
   .attr("y", function(d){return d.y})
-  .attr("width", 50)
-  .attr("height", 50)
+  .attr("width", 25)
+  .attr("height", 25)
   .attr("fill", 'green')
   .call(onDragDrop(dragmove));
 
 
 
-//function to move enemies to new coordinates
-var moveEnemy = function(){
-d3.select('svg').selectAll('circle').data(initialEnemies)
-  .transition()
-  .duration(1500)
-  .tween("custom", moveAndCollide)
-  .ease('exp')
-  .attr('cx', function(d){return axes.x(d.x)})
-  .attr('cy', function(d){return axes.y(d.y)})
-  .attr('r', function(d){return d.r})
-}
 
+
+//function to move enemies to new coordinates
 var moveAndCollide = function(){
   var enemy = d3.select(this);
   var startPos = {
-    "x": parseFloat(enemy.attr("cx")),
-    "y": parseFloat(enemy.attr("cy"))
+    "x": parseFloat(enemy.attr("x")),
+    "y": parseFloat(enemy.attr("y"))
   }
   var endPos = {
+    "x": axes.x(Math.random()*100),
+    "y": axes.y(Math.random()*100)
+  }
+  return function(t){
+    var nextEnemyPos = {
+      "x": startPos.x + (endPos.x - startPos.x)*t,
+      "y": startPos.y + (endPos.y - startPos.y)*t
+    };
+    enemy.attr("x", nextEnemyPos.x);
+    enemy.attr("y", nextEnemyPos.y);
+    checkCollision(enemy);
+  }
+}
+var moveEnemy = function(){
+d3.select('svg').selectAll('image').data(enemies)
+  .transition()
+  .duration(1500)
+  .tween("custom", moveAndCollide)
+}
+setInterval(moveEnemy, 1500);
 
+
+var checkCollision = function(enemy){
+  var radiusSum = enemy.attr('r');
+  xDiff = parseFloat(enemy.attr("x") - player.attr("x"));
+  yDiff = parseFloat(enemy.attr("y") - player.attr("y"));
+  separation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
+  if(separation < radiusSum){
+    collided();
   }
 }
 
 
-
-setInterval(moveEnemy, 1500);
+//setInterval(moveEnemy, 1500);
 
 //setup scoreboard
 var scoreBoard = {
@@ -108,7 +132,7 @@ setInterval(function(){
   scoreBoard.current++;
 d3.select('.current').selectAll('span')
   .text(scoreBoard.current)
-}, 50)
+}, 100)
 
 var collided = function() {
   //load current high score
